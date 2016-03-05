@@ -11,12 +11,12 @@ import android.view.View;
 
 import com.aspirephile.com.parlayultimatum.R;
 
-public class PointListActivity extends AppCompatActivity {
+public class PointViewerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_point_list);
+        setContentView(R.layout.activity_point_viewer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -33,7 +33,7 @@ public class PointListActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_point_list, menu);
+        getMenuInflater().inflate(R.menu.menu_point_viewer, menu);
         return true;
     }
 
