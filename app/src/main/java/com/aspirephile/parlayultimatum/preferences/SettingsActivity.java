@@ -18,10 +18,15 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.aspirephile.parlayultimatum.R;
+import com.aspirephile.parlayultimatum.db.OnRemoteConnectionEstablishedListener;
+import com.aspirephile.parlayultimatum.db.ParlayUltimatumConnection;
+import com.aspirephile.parlayultimatum.db.ParlayUltimatumDb;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -40,7 +45,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
      */
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
+    private static Preference.OnPreferenceChangeListener defaultBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
@@ -104,15 +109,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * immediately updated upon calling this method. The exact display format is
      * dependent on the type of preference.
      *
-     * @see #sBindPreferenceSummaryToValueListener
+     * @see #defaultBindPreferenceSummaryToValueListener
      */
     private static void bindPreferenceSummaryToValue(Preference preference) {
         // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
+        preference.setOnPreferenceChangeListener(defaultBindPreferenceSummaryToValueListener);
         // Trigger the listener immediately with the preference's
         // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+        defaultBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
                         .getString(preference.getKey(), ""));
@@ -179,8 +183,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_general_display_name)));
+//            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_general_add_friends_to_messages)));
         }
 
         @Override
@@ -188,6 +192,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             int id = item.getItemId();
             if (id == android.R.id.home) {
                 startActivity(new Intent(getActivity(), SettingsActivity.class));
+                getActivity().finish();
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -210,7 +215,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_notifications_ringtone)));
+//            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_notifications_vibrate)));
         }
 
         @Override
@@ -218,6 +224,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             int id = item.getItemId();
             if (id == android.R.id.home) {
                 startActivity(new Intent(getActivity(), SettingsActivity.class));
+                getActivity().finish();
                 return true;
             }
             return super.onOptionsItemSelected(item);
@@ -240,7 +247,67 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("sync_frequency"));
+            bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_data_sync_frequency)));
+
+
+            // Set the listener to watch for value changes.
+            Preference backendPreference = findPreference(getString(R.string.pref_key_data_sync_backend_url));
+            Preference.OnPreferenceChangeListener backendPreferenceListener
+                    = new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(final Preference preference, final Object newValue) {
+                    preference.setSummary(getString(R.string.setting_data_sync_backend_url_connecting));
+                    final String url = newValue.toString();
+                    final long start = System.currentTimeMillis();
+
+                    ParlayUltimatumDb.getRemoteConnection(url, new OnRemoteConnectionEstablishedListener() {
+                        @Override
+                        public void onRemoteConnectionEstablishedListener(final ParlayUltimatumConnection connection, SQLException e) {
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    long remainingTime = 500 - (System.currentTimeMillis() - start);
+                                    if (remainingTime > 0)
+                                        try {
+                                            Thread.sleep(remainingTime);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    Log.i("SettingsActivity", "Persisted 'Connecting...'");
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (connection != null)
+                                                preference.setSummary(url);
+                                            else
+                                                preference
+                                                        .setSummary(getString(R.string.setting_data_sync_backend_url_error)
+                                                                + " " + url);
+                                        }
+                                    });
+                                }
+                            });
+                            if (connection != null)
+                                preference.setSummary(url);
+                            else
+                                preference
+                                        .setSummary(getString(R.string.setting_data_sync_backend_url_error)
+                                                + " " + url);
+                        }
+                    });
+
+                    return true;
+                }
+            };
+            backendPreference.setOnPreferenceChangeListener(backendPreferenceListener);
+
+            // Trigger the listener immediately with the preference's
+            // current value.
+            backendPreferenceListener.onPreferenceChange(backendPreference,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(backendPreference.getContext())
+                            .getString(backendPreference.getKey(), ""));
         }
 
         @Override
@@ -248,6 +315,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             int id = item.getItemId();
             if (id == android.R.id.home) {
                 startActivity(new Intent(getActivity(), SettingsActivity.class));
+                getActivity().finish();
                 return true;
             }
             return super.onOptionsItemSelected(item);

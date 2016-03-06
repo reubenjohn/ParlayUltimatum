@@ -10,11 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.aspirephile.parlayultimatum.App;
 import com.aspirephile.parlayultimatum.R;
-import com.aspirephile.parlayultimatum.db.tables.Point;
+import com.aspirephile.parlayultimatum.db.OnQueryComplete;
+import com.aspirephile.parlayultimatum.db.ParlayUltimatumDb;
 import com.aspirephile.parlayultimatum.point.PointContent.PointItem;
 import com.aspirephile.shared.debug.Logger;
+import com.aspirephile.shared.debug.NullPointerAsserter;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,10 +32,12 @@ public class PointListFragment extends Fragment {
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
     private Logger l = new Logger(PointListFragment.class);
-    // TODO: Customize parameters
+    private NullPointerAsserter asserter = new NullPointerAsserter(l);
+
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
-    private List<Point> points = new ArrayList<>();
+    private List<PointItem> pointItems = new ArrayList<>();
+    private RecyclerView recyclerView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -59,14 +62,22 @@ public class PointListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         l.d("Initializing points");
-        try {
-            String url = "jdbc:aceql:http://localhost:9090/ServerSqlManager";
-            points = ((App) getActivity().getApplication()).getDefaultRemoteConnectionIfExists(url).getPoints();
-            for (Point p : points)
-                l.d(p.toString());
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        ParlayUltimatumDb.getPointItems(new OnQueryComplete<PointItem>() {
+            @Override
+            public void onQueryComplete(List<PointItem> list, SQLException e1) {
+                if (e1 != null) {
+                    e1.printStackTrace();
+                } else {
+                    pointItems = list;
+                    for (PointItem p : pointItems) {
+                        l.d(p.toString());
+                        p.views += " " + getString(R.string.views);
+                    }
+                    if (asserter.assertPointer(recyclerView))
+                        recyclerView.setAdapter(new PointRecyclerViewAdapter(pointItems, mListener));
+                }
+            }
+        });
 
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
@@ -81,13 +92,13 @@ public class PointListFragment extends Fragment {
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView = (RecyclerView) view;
             if (mColumnCount <= 1) {
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new PointRecyclerViewAdapter(PointContent.ITEMS, mListener));
+            recyclerView.setAdapter(new PointRecyclerViewAdapter(pointItems, mListener));
         }
         return view;
     }

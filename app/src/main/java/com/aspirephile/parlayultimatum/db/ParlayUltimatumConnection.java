@@ -15,7 +15,6 @@ package com.aspirephile.parlayultimatum.db;
 //import org.kawanfw.sql.api.client.RemoteDriver;
 
 import com.aspirephile.parlayultimatum.db.tables.ParlayUser;
-import com.aspirephile.parlayultimatum.db.tables.Point;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -58,20 +57,22 @@ public class ParlayUltimatumConnection {
      * remote database.
      *
      * @return the Connection to the remote database
-     * @throws SQLException           if a database access error occurs
-     * @throws ClassNotFoundException if AceQL client jar is not in the classpath
+     * @throws SQLException if a database access error occurs
      */
 
-    public static Connection remoteConnectionBuilder(String url, String username, String password) throws SQLException,
-            ClassNotFoundException {
+    public static Connection remoteConnectionBuilder(String url, String username, String password) throws SQLException {
 
         // Required for Android, optional for others environments:
-        Class.forName("org.kawanfw.sql.api.client.RemoteDriver");
+        try {
+            //ClassNotFoundException if AceQL client jar is not in the classpath
+            Class.forName("org.kawanfw.sql.api.client.RemoteDriver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
         // Attempt to establish a connection to the remote database:
 
-        return DriverManager.getConnection(url, username,
-                password);
+        return DriverManager.getConnection(url, username, password);
     }
 
     /**
@@ -220,40 +221,6 @@ public class ParlayUltimatumConnection {
         return parlayUsers;
     }
 
-    public List<Point> getPoints() throws SQLException {
-        // Display the created Customer:
-        String sql = "SELECT * FROM PointPreview";
-        PreparedStatement prepStatement = connection.prepareStatement(sql);
-        // prepStatement.setInt(1, customerId);
-
-        ResultSet rs = prepStatement.executeQuery();
-        ArrayList<Point> pointList = new ArrayList<>();
-        while (rs.next()) {
-            pointList.add(new Point(rs));
-        }
-        prepStatement.close();
-        rs.close();
-        return pointList;
-    }
-
-    private Point getPoint(int PID) throws SQLException {
-        String sql = "SELECT * FROM PointPreview where PID = ?";
-        PreparedStatement prepStatement = connection.prepareStatement(sql);
-        prepStatement.setInt(1, PID);
-
-        Point point = null;
-        ResultSet rs = prepStatement.executeQuery();
-        while (rs.next()) {
-            if (point != null)
-                throw new SQLException(
-                        "Multiple entries for PID (assumed to be unique)");
-            point = new Point(rs);
-        }
-        prepStatement.close();
-        rs.close();
-        return point;
-    }
-
     /**
      * Delete an existing customers
      *
@@ -290,6 +257,10 @@ public class ParlayUltimatumConnection {
         prepStatement.executeUpdate();
         prepStatement.close();
 
+    }
+
+    public void close() throws SQLException {
+        connection.close();
     }
 
 /**
