@@ -1,5 +1,6 @@
 package com.aspirephile.parlayultimatum;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -16,6 +17,7 @@ import android.view.View;
 
 import com.aspirephile.parlayultimatum.point.PointContent;
 import com.aspirephile.parlayultimatum.point.PointListFragment;
+import com.aspirephile.parlayultimatum.preferences.SettingsActivity;
 import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
 
@@ -96,6 +98,8 @@ public class HomeActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent i = new Intent(HomeActivity.this, SettingsActivity.class);
+            startActivity(i);
             return true;
         }
 
