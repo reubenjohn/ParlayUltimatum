@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -13,10 +14,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.aspirephile.com.parlayultimatum.R;
+import com.aspirephile.parlayultimatum.point.PointContent;
+import com.aspirephile.parlayultimatum.point.PointListFragment;
+import com.aspirephile.shared.debug.Logger;
+import com.aspirephile.shared.debug.NullPointerAsserter;
 
 public class HomeActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, PointListFragment.OnListFragmentInteractionListener {
+
+    private Logger l = new Logger(HomeActivity.class);
+    private NullPointerAsserter asserter = new NullPointerAsserter(l);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,38 +50,25 @@ public class HomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        openPointListFragment();
     }
 
-/*
-    private void openSocialFragment() {
-        l.d("Opening social fragment");
+
+    private void openPointListFragment() {
+        // find the retained fragment on activity restarts
         FragmentManager fm = getSupportFragmentManager();
-        socialF = (SocialFragment) fm.findFragmentByTag(AppConstants.tags.socialFragment);
+        PointListFragment homeF = (PointListFragment) fm.findFragmentByTag(Constants.tags.pointListFragment);
 
-        if (!asserter.assertPointerQuietly(socialF)) {
-            l.i("Creating new " + SocialFragment.class.getSimpleName() + " fragment");
-            socialF = new SocialFragment();
-        }
-
-        //Clear back stack since this is the root fragment
-        int count = fm.getBackStackEntryCount();
-        for (int i = 0; i < count; ++i) {
-            fm.popBackStack();
-        }
-
-        if (currentContext == context.SOCIAL) {
-            l.e("Ignoring attempt to open social fragment: It is already open");
-            return;
-        } else {
-            setTitle(getString(R.string.title_activity_home));
+        if (!asserter.assertPointerQuietly(homeF)) {
+            l.i("Creating new " + PointListFragment.class.getSimpleName() + " fragment");
+            homeF = PointListFragment.newInstance(1);
             fm.beginTransaction()
-                    .replace(R.id.container_home, socialF, AppConstants.tags.socialFragment)
-                    .attach(socialF)
+                    .replace(R.id.container_home, homeF, Constants.tags.pointListFragment)
                     .commit();
         }
-        currentContext = context.SOCIAL;
+        asserter.assertPointer(homeF);
     }
-*/
 
     @Override
     public void onBackPressed() {
@@ -131,5 +125,10 @@ public class HomeActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onListFragmentInteraction(PointContent.PointItem item) {
+
     }
 }

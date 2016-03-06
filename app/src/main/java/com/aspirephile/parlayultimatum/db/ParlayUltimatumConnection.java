@@ -49,7 +49,7 @@ public class ParlayUltimatumConnection {
      *
      * @param connection the AwakeConnection to use for this session
      */
-    private ParlayUltimatumConnection(Connection connection) {
+    public ParlayUltimatumConnection(Connection connection) {
         this.connection = connection;
     }
 
@@ -62,16 +62,8 @@ public class ParlayUltimatumConnection {
      * @throws ClassNotFoundException if AceQL client jar is not in the classpath
      */
 
-    public static Connection remoteConnectionBuilder() throws SQLException,
+    public static Connection remoteConnectionBuilder(String url, String username, String password) throws SQLException,
             ClassNotFoundException {
-
-        // Port number is the port number used to start the Web Server:
-        String url = "jdbc:aceql:http://localhost:9090/ServerSqlManager";
-
-        // (username, password) for authentication on server side.
-        // No authentication will be done for our Quick Start:
-        String username = "reuben";
-        String password = "pass";
 
         // Required for Android, optional for others environments:
         Class.forName("org.kawanfw.sql.api.client.RemoteDriver");
@@ -312,44 +304,44 @@ public class ParlayUltimatumConnection {
 
 		Connection connection = ParlayUltimatumConnection
 				.remoteConnectionBuilder();
-		ParlayUltimatumConnection myRemoteConnection = new ParlayUltimatumConnection(
+		ParlayUltimatumConnection remoteConnection = new ParlayUltimatumConnection(
 				connection);
 
 		// System.out.println("deleting customer...");
 		// Delete previous instances, so that user can recall class
-		// myRemoteConnection.deleteCustomer(connection, customerId);
+		// remoteConnection.deleteCustomer(connection, customerId);
 		// System.out.println("deleting orderlog...");
-		// myRemoteConnection.deleteOrderlog(connection, customerId, itemId);
+		// remoteConnection.deleteOrderlog(connection, customerId, itemId);
 
-		// myRemoteConnection.insertCustomerAndOrderLog(customerId, itemId);
-		// myRemoteConnection.selectCustomerAndOrderLog(customerId, itemId);
+		// remoteConnection.insertCustomerAndOrderLog(customerId, itemId);
+		// remoteConnection.selectCustomerAndOrderLog(customerId, itemId);
 
 		Log.d("Connection","ParlayUsers:");
-		List<ParlayUser> parlayUsers = myRemoteConnection.getParlayUsers();
+		List<ParlayUser> parlayUsers = remoteConnection.getParlayUsers();
 		for (ParlayUser p : parlayUsers) {
 			Log.d("Connection", p.toString());
 		}
 
 		Log.d("Connection", "Points:");
-		List<Point> points = myRemoteConnection.getPoints();
+		List<Point> points = remoteConnection.getPoints();
 		for (Point p : points) {
 			Log.d("Connection", p.toString());
 		}
 		System.out.println("Enter the PID: ");
 //		Scanner s = new Scanner(System.in);
-		Point point = myRemoteConnection.getPoint(21);
+		Point point = remoteConnection.getPoint(21);
 		Log.d("Connection", point.toString());
 
 */
 /*
         System.out.println("Points:");
-		List<Point> points = myRemoteConnection.getPoints();
+		List<Point> points = remoteConnection.getPoints();
 		for (Point p : points) {
 			System.out.println(p);
 		}
 		System.out.println("Enter the PID: ");
 		Scanner s = new Scanner(System.in);
-		Point point = myRemoteConnection.getPoint(s.nextInt());
+		Point point = remoteConnection.getPoint(s.nextInt());
 		System.out.println(point);
 		*//*
 
