@@ -22,9 +22,9 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import com.aspirephile.parlayultimatum.R;
-import com.aspirephile.parlayultimatum.db.OnRemoteConnectionEstablishedListener;
-import com.aspirephile.parlayultimatum.db.ParlayUltimatumConnection;
-import com.aspirephile.parlayultimatum.db.ParlayUltimatumDb;
+import org.kawanfw.sql.api.client.android.OnRemoteConnectionEstablishedListener;
+import org.kawanfw.sql.api.client.android.BackendConnection;
+import org.kawanfw.sql.api.client.android.AceQLDBManager;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -260,9 +260,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     final String url = newValue.toString();
                     final long start = System.currentTimeMillis();
 
-                    ParlayUltimatumDb.getRemoteConnection(url, new OnRemoteConnectionEstablishedListener() {
+                    AceQLDBManager.getRemoteConnection(url, new OnRemoteConnectionEstablishedListener() {
                         @Override
-                        public void onRemoteConnectionEstablishedListener(final ParlayUltimatumConnection connection, SQLException e) {
+                        public void onRemoteConnectionEstablishedListener(final BackendConnection connection, SQLException e) {
                             new Thread(new Runnable() {
                                 @Override
                                 public void run() {

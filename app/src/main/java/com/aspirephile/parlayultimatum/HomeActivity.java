@@ -7,9 +7,11 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +28,9 @@ public class HomeActivity extends AppCompatActivity
 
     private Logger l = new Logger(HomeActivity.class);
     private NullPointerAsserter asserter = new NullPointerAsserter(l);
+    private SearchView searchView;
+
+    private PointListFragment pointListF;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,16 +65,18 @@ public class HomeActivity extends AppCompatActivity
     private void openPointListFragment() {
         // find the retained fragment on activity restarts
         FragmentManager fm = getSupportFragmentManager();
-        PointListFragment homeF = (PointListFragment) fm.findFragmentByTag(Constants.tags.pointListFragment);
+        pointListF = (PointListFragment) fm.findFragmentByTag(Constants.tags.pointListFragment);
 
-        if (!asserter.assertPointerQuietly(homeF)) {
+        if (!asserter.assertPointerQuietly(pointListF)) {
             l.i("Creating new " + PointListFragment.class.getSimpleName() + " fragment");
-            homeF = PointListFragment.newInstance(1);
+            pointListF = PointListFragment.newInstance(1);
             fm.beginTransaction()
-                    .replace(R.id.container_home, homeF, Constants.tags.pointListFragment)
+                    .replace(R.id.container_home, pointListF, Constants.tags.pointListFragment)
                     .commit();
         }
-        asserter.assertPointer(homeF);
+        if (asserter.assertPointer(pointListF, searchView)) {
+            searchView.setOnQueryTextListener(pointListF);
+        }
     }
 
     @Override
@@ -86,6 +93,9 @@ public class HomeActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.home, menu);
+        searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.home_action_search));
+        if (pointListF != null)
+            searchView.setOnQueryTextListener(pointListF);
         return true;
     }
 
@@ -97,9 +107,12 @@ public class HomeActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.home_action_settings) {
             Intent i = new Intent(HomeActivity.this, SettingsActivity.class);
             startActivity(i);
+            return true;
+        } else if (id == R.id.home_action_search) {
+
             return true;
         }
 

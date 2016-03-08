@@ -2,7 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/home_action_search"
+        android:icon="@drawable/ic_search_white_48dp"
+        android:title="@string/search"
+        app:actionLayout="@layout/simple_search_view_item"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/home_action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />

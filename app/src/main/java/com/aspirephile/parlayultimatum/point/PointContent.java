@@ -1,5 +1,9 @@
 package com.aspirephile.parlayultimatum.point;
 
+import android.content.Context;
+
+import com.aspirephile.parlayultimatum.R;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -21,11 +25,11 @@ public class PointContent {
         public final String tag1, tag2, tag3, tag4;
         public String views;
 
-        public PointItem(ResultSet rs) throws SQLException {
+        public PointItem(ResultSet rs, Context context) throws SQLException {
             PID = String.valueOf(rs.getInt("PID"));
             poster = rs.getString("poster");
             title = rs.getString("title");
-            views = rs.getString("views");
+            views = rs.getString("views") + " " + context.getString(R.string.views);
             upVotesPercentage = rs.getShort("upVotesPercentage");
             tag1 = rs.getString("tag1");
             tag2 = rs.getString("tag2");

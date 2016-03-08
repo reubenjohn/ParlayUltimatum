@@ -166,4 +166,7 @@
     <string name="setting_data_sync_backend_url_error">Could not connect to:</string>
     <string name="setting_data_sync_backend_url_connecting">Connecting…</string>
     <string name="views">views</string>
+
+    <string name="point_list_search_hint">Search for topics…</string>
+    <string name="search">Search</string>
 </resources>

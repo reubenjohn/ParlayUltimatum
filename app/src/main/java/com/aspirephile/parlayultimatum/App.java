@@ -2,7 +2,7 @@ package com.aspirephile.parlayultimatum;
 
 import android.support.multidex.MultiDexApplication;
 
-import com.aspirephile.parlayultimatum.db.ParlayUltimatumDb;
+import org.kawanfw.sql.api.client.android.AceQLDBManager;
 import com.aspirephile.shared.debug.Logger;
 
 public class App extends MultiDexApplication {
@@ -12,6 +12,7 @@ public class App extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
         l.d(App.class.getSimpleName() + " being created");
-        ParlayUltimatumDb.initialize(getApplicationContext());
+        AceQLDBManager.initialize(getString(R.string.pref_default_data_sync_backend_url),
+                "reuben", "pass");
     }
 }
