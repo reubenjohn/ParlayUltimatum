@@ -183,4 +183,6 @@
     <string name="point_creator_error_description_too_long">Your description is too long!</string>
     <string name="point_creator_creating">Creating point…</string>
     <string name="point_error_ui">An error occurred with the graphics.</string>
+    <string name="point_list_fetch_failed">Failed to fetch the points</string>
+    <string name="retry">Retry</string>
 </resources>

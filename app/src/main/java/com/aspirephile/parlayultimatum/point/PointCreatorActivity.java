@@ -11,7 +11,7 @@ import com.aspirephile.parlayultimatum.R;
 import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
 
-public class PointCreatorActivity extends AppCompatActivity implements OrganizationCreatorFragment.PointCreatorListener {
+public class PointCreatorActivity extends AppCompatActivity implements PointCreatorFragment.PointCreatorListener {
     private Logger l = new Logger(PointCreatorActivity.class);
     private NullPointerAsserter asserter = new NullPointerAsserter(l);
 
@@ -86,11 +86,11 @@ public class PointCreatorActivity extends AppCompatActivity implements Organizat
     private void openOrganizationCreatorFragment() {
         // find the retained fragment on activity restarts
         FragmentManager fm = getSupportFragmentManager();
-        OrganizationCreatorFragment organizationCreatorF = (OrganizationCreatorFragment) fm.findFragmentByTag(Constants.tags.pointCreatorFragment);
+        PointCreatorFragment organizationCreatorF = (PointCreatorFragment) fm.findFragmentByTag(Constants.tags.pointCreatorFragment);
 
         if (!asserter.assertPointerQuietly(organizationCreatorF)) {
-            l.i("Creating new " + OrganizationCreatorFragment.class.getSimpleName() + " fragment");
-            organizationCreatorF = new OrganizationCreatorFragment();
+            l.i("Creating new " + PointCreatorFragment.class.getSimpleName() + " fragment");
+            organizationCreatorF = new PointCreatorFragment();
             fm.beginTransaction()
                     .replace(R.id.container_organization_creator, organizationCreatorF, Constants.tags.pointCreatorFragment)
                     .commit();

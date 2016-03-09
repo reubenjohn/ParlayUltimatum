@@ -27,6 +27,8 @@ import com.aspirephile.parlayultimatum.preferences.SettingsActivity;
 import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
 
+import java.sql.SQLException;
+
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, PointListFragment.OnListFragmentInteractionListener {
 
@@ -171,9 +173,21 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListFragmentInteraction(PointContent.PointItem item) {
+    public void onPointListItemSelected(PointContent.PointItem item) {
         //TODO Open the right point here
         Intent i = new Intent(HomeActivity.this, PointViewerActivity.class);
         startActivityForResult(i, Constants.codes.result.point_viewer);
+    }
+
+    @Override
+    public void onPointListLoadFailed(SQLException e) {
+        Snackbar.make(coordinatorLayout, R.string.point_list_fetch_failed, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.retry, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (asserter.assertPointer(pointListF))
+                            pointListF.onRefresh();
+                    }
+                }).show();
     }
 }

@@ -13,14 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.aspirephile.parlayultimatum.R;
-
-import org.kawanfw.sql.api.client.android.ItemBuilder;
-import org.kawanfw.sql.api.client.android.OnQueryComplete;
-import org.kawanfw.sql.api.client.android.AceQLDBManager;
-
 import com.aspirephile.parlayultimatum.point.PointContent.PointItem;
 import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
+
+import org.kawanfw.sql.api.client.android.AceQLDBManager;
+import org.kawanfw.sql.api.client.android.ItemBuilder;
+import org.kawanfw.sql.api.client.android.OnQueryComplete;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -125,12 +124,12 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
                 "FROM Point";
         OnQueryComplete<PointItem> onQueryCompletedListener = new OnQueryComplete<PointItem>() {
             @Override
-            public void onQueryComplete(List<PointItem> list, SQLException e1) {
+            public void onQueryComplete(List<List<PointItem>> list, SQLException e1) {
                 if (e1 != null) {
-                    e1.printStackTrace();
+                    mListener.onPointListLoadFailed(e1);
                 } else {
                     l.i("Point query completed successfully");
-                    pointItems = list;
+                    pointItems = list.get(0);
                     if (asserter.assertPointer(recyclerView))
                         recyclerView.setAdapter(new PointRecyclerViewAdapter(pointItems, mListener));
                 }
@@ -148,7 +147,7 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
                 }
             }
         };
-        AceQLDBManager.getRowList(sql, itemBuilder, onQueryCompletedListener);
+        AceQLDBManager.getSelectedLists(sql, itemBuilder, onQueryCompletedListener);
     }
 
     @Override
@@ -173,6 +172,8 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(PointItem item);
+        void onPointListItemSelected(PointItem item);
+
+        void onPointListLoadFailed(SQLException e);
     }
 }

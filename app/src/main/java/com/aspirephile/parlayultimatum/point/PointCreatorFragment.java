@@ -20,10 +20,18 @@ import com.aspirephile.parlayultimatum.R;
 import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
 
-public class OrganizationCreatorFragment extends Fragment implements View.OnClickListener {
+import org.kawanfw.sql.api.client.android.AceQLDBManager;
+import org.kawanfw.sql.api.client.android.OnInsertListener;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PointCreatorFragment extends Fragment implements View.OnClickListener {
 
     PointCreatorListener pointCreatorListener;
-    private Logger l = new Logger(OrganizationCreatorFragment.class);
+    private Logger l = new Logger(PointCreatorFragment.class);
     private NullPointerAsserter asserter = new NullPointerAsserter(l);
     private CoordinatorLayout coordinatorLayout;
     private CollapsingToolbarLayout collapsingToolbarLayout;
@@ -31,7 +39,7 @@ public class OrganizationCreatorFragment extends Fragment implements View.OnClic
     private TextInputLayout titleContainer, descriptionContainer;
     private Snackbar invalidFieldsSnackbar;
 
-    public OrganizationCreatorFragment() {
+    public PointCreatorFragment() {
         l.onConstructor();
     }
 
@@ -109,11 +117,11 @@ public class OrganizationCreatorFragment extends Fragment implements View.OnClic
 
     private void bridgeXML(View v) {
         l.bridgeXML();
-        coordinatorLayout = (CoordinatorLayout) v.findViewById(R.id.cl_organization_creator);
-        collapsingToolbarLayout = (CollapsingToolbarLayout) v.findViewById(R.id.ctl_organization_creator);
+        coordinatorLayout = (CoordinatorLayout) v.findViewById(R.id.cl_point_creator);
+        collapsingToolbarLayout = (CollapsingToolbarLayout) v.findViewById(R.id.ctl_point_creator);
 
-        titleContainer = (TextInputLayout) v.findViewById(R.id.til_organization_creator_title);
-        descriptionContainer = (TextInputLayout) v.findViewById(R.id.til_organization_creator_description);
+        titleContainer = (TextInputLayout) v.findViewById(R.id.til_point_creator_title);
+        descriptionContainer = (TextInputLayout) v.findViewById(R.id.til_point_creator_description);
 
         done = (FloatingActionButton) v.findViewById(R.id.fab_point_creator);
 
@@ -193,13 +201,13 @@ public class OrganizationCreatorFragment extends Fragment implements View.OnClic
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.fab_point_creator) {
-            createOrganization();
+            createPoint();
         } else {
             l.w("Unhandled view clicked with ID: " + v.getId());
         }
     }
 
-    private void createOrganization() {
+    private void createPoint() {
         if (isFieldsValid()) {
             l.d("Creating point");
             Point point = new Point();
@@ -210,6 +218,35 @@ public class OrganizationCreatorFragment extends Fragment implements View.OnClic
                 point.setTitle(titleContainer.getEditText().getText().toString());
                 //noinspection ConstantConditions
                 point.setDescription(descriptionContainer.getEditText().getText().toString());
+
+                List<Point> list = new ArrayList<>();
+                list.add(point);
+                String sql = "insert into Point (username,title,description) values(?, ?, ?)";
+                AceQLDBManager.performRawInsertion(sql, list, new OnInsertListener<Point>() {
+                    @Override
+                    public void onInsertRow(PreparedStatement preparedStatement, Point item) {
+                        try {
+                            //TODO Use legitimate username
+                            preparedStatement.setString(1, "reubenjohn");
+                            preparedStatement.setString(2, item.getTitle());
+                            preparedStatement.setString(3, item.getDescription());
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                            pointCreatorListener.onCreationFailed();
+                        }
+                    }
+
+                    @Override
+                    public void onResult(SQLException e) {
+                        if (e != null) {
+                            e.printStackTrace();
+                            pointCreatorListener.onCreationFailed();
+                        } else {
+                            pointCreatorListener.onCreationSuccess();
+                        }
+                    }
+                });
+//                AceQLDBManager.performDefaultInsert(list);
             } else {
                 Snackbar.make(coordinatorLayout, R.string.point_error_ui, Snackbar.LENGTH_SHORT)
                         .show();
