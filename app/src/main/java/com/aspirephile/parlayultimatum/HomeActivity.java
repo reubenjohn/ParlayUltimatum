@@ -1,7 +1,9 @@
 package com.aspirephile.parlayultimatum;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -18,7 +20,9 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.aspirephile.parlayultimatum.point.PointContent;
+import com.aspirephile.parlayultimatum.point.PointCreatorActivity;
 import com.aspirephile.parlayultimatum.point.PointListFragment;
+import com.aspirephile.parlayultimatum.point.PointViewerActivity;
 import com.aspirephile.parlayultimatum.preferences.SettingsActivity;
 import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
@@ -31,20 +35,24 @@ public class HomeActivity extends AppCompatActivity
     private SearchView searchView;
 
     private PointListFragment pointListF;
+    private CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.cl_home);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_point_list);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent i = new Intent(HomeActivity.this, PointCreatorActivity.class);
+                startActivityForResult(i, Constants.codes.result.point_creator);
             }
         });
 
@@ -59,6 +67,24 @@ public class HomeActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         openPointListFragment();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        l.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == Constants.codes.result.point_creator) {
+            if (resultCode == Activity.RESULT_OK) {
+                Snackbar.make(coordinatorLayout, R.string.point_creator_success, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.undo, null).show();
+            } else {
+                Snackbar.make(coordinatorLayout, R.string.point_creator_failure, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.try_again, null).show();
+                //TODO Also pass and display the reason for the error from the point creator
+            }
+        } else {
+            l.w("Unhandled request code");
+        }
     }
 
 
@@ -146,6 +172,8 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentInteraction(PointContent.PointItem item) {
-
+        //TODO Open the right point here
+        Intent i = new Intent(HomeActivity.this, PointViewerActivity.class);
+        startActivityForResult(i, Constants.codes.result.point_viewer);
     }
 }

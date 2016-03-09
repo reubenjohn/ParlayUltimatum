@@ -20,7 +20,7 @@ public class PointViewerActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_point_list);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_point_viewer);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

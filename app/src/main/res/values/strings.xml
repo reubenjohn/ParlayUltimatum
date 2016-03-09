@@ -169,4 +169,18 @@
 
     <string name="point_list_search_hint">Search for topics…</string>
     <string name="search">Search</string>
+    <string name="point_creator_success">Successfully created the topic.</string>
+    <string name="point_creator_failure">Failed to create the topic</string>
+    <string name="undo">Undo</string>
+    <string name="try_again">Try again</string>
+    <string name="title_activity_point_creator">PointCreatorActivity</string>
+    <string name="point_creator_error_invalid_fields">Invalid fields</string>
+    <string name="point_title_hint">Your title goes here…</string>
+    <string name="point_description_hint">Description</string>
+    <string name="point_creator_error_title_too_short">Title too short</string>
+    <string name="point_creator_error_title_too_long">Title too long</string>
+    <string name="point_creator_error_description_too_short">Your description is too short</string>
+    <string name="point_creator_error_description_too_long">Your description is too long!</string>
+    <string name="point_creator_creating">Creating point…</string>
+    <string name="point_error_ui">An error occurred with the graphics.</string>
 </resources>
