@@ -18,8 +18,8 @@ import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
 
 import org.kawanfw.sql.api.client.android.AceQLDBManager;
-import org.kawanfw.sql.api.client.android.ItemBuilder;
-import org.kawanfw.sql.api.client.android.OnQueryComplete;
+import org.kawanfw.sql.api.client.android.execute.query.ItemBuilder;
+import org.kawanfw.sql.api.client.android.execute.query.OnQueryComplete;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -115,6 +115,7 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onRefresh() {
         l.d("onRefresh");
+        swipeRefreshLayout.setRefreshing(true);
         String sql = "SELECT PID, " +
                 "username as poster, " +
                 "title, " +

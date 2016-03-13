@@ -74,6 +74,8 @@ Thumbs.db
 # Log Files
 *.log
 
+local.properties
+
 #Keystores
 *.keystore
 *.jks

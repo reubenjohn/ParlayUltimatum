@@ -21,9 +21,8 @@ import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
 
 import org.kawanfw.sql.api.client.android.AceQLDBManager;
-import org.kawanfw.sql.api.client.android.OnInsertListener;
+import org.kawanfw.sql.api.client.android.execute.update.OnUpdateCompleteListener;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -210,7 +209,7 @@ public class PointCreatorFragment extends Fragment implements View.OnClickListen
     private void createPoint() {
         if (isFieldsValid()) {
             l.d("Creating point");
-            Point point = new Point();
+            final Point point = new Point();
             if (isContainerEditTextAvailable()) {
                 Snackbar.make(coordinatorLayout, R.string.point_creator_creating, Snackbar.LENGTH_INDEFINITE)
                         .show();
@@ -221,32 +220,24 @@ public class PointCreatorFragment extends Fragment implements View.OnClickListen
 
                 List<Point> list = new ArrayList<>();
                 list.add(point);
-                String sql = "insert into Point (username,title,description) values(?, ?, ?)";
-                AceQLDBManager.performRawInsertion(sql, list, new OnInsertListener<Point>() {
+                AceQLDBManager.insertSQLEntityList(list, new OnUpdateCompleteListener() {
                     @Override
-                    public void onInsertRow(PreparedStatement preparedStatement, Point item) {
-                        try {
-                            //TODO Use legitimate username
-                            preparedStatement.setString(1, "reubenjohn");
-                            preparedStatement.setString(2, item.getTitle());
-                            preparedStatement.setString(3, item.getDescription());
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                            pointCreatorListener.onCreationFailed();
-                        }
-                    }
-
-                    @Override
-                    public void onResult(SQLException e) {
+                    public void onUpdateComplete(int[] results, SQLException e) {
                         if (e != null) {
-                            e.printStackTrace();
                             pointCreatorListener.onCreationFailed();
-                        } else {
+                            e.printStackTrace();
+                        } else if (results.length == 0) {
+                            l.i("Received result set of length: " + results.length + " with first element indicating: " + results[0] + " updates");
+                            pointCreatorListener.onCreationFailed();
+                        } else if (results[0] > 0) {
+                            l.i("Received result set of length: " + results.length + " with first element indicating: " + results[0] + " updates");
                             pointCreatorListener.onCreationSuccess();
+                        } else {
+                            l.i("Received result set of length: " + results.length + " with first element indicating: " + results[0] + " updates");
+                            pointCreatorListener.onCreationFailed();
                         }
                     }
                 });
-//                AceQLDBManager.performDefaultInsert(list);
             } else {
                 Snackbar.make(coordinatorLayout, R.string.point_error_ui, Snackbar.LENGTH_SHORT)
                         .show();

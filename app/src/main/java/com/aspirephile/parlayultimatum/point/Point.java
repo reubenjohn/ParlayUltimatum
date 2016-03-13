@@ -1,6 +1,11 @@
 package com.aspirephile.parlayultimatum.point;
 
-public class Point {
+import org.kawanfw.sql.api.client.android.execute.update.SQLEntity;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class Point implements SQLEntity {
     private String title;
     private String description;
     private String username;
@@ -23,5 +28,23 @@ public class Point {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public String getEntityName() {
+        return "Point";
+    }
+
+    @Override
+    public String[] getAttributeNames() {
+        return new String[]{"username", "title", "description"};
+    }
+
+    @Override
+    public int onPrepareStatement(PreparedStatement preparedStatement, int i) throws SQLException {
+        preparedStatement.setString(i++, username);
+        preparedStatement.setString(i++, title);
+        preparedStatement.setString(i++, description);
+        return i;
     }
 }

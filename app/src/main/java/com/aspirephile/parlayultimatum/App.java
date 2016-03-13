@@ -24,6 +24,7 @@ public class App extends MultiDexApplication {
     @Override
     public void onTerminate() {
         super.onTerminate();
+        l.w("onTerminate");
         AceQLDBManager.getDefaultRemoteConnectionIfExists(new OnRemoteConnectionEstablishedListener() {
             @Override
             public void onRemoteConnectionEstablishedListener(BackendConnection remoteConnection, SQLException e) {
