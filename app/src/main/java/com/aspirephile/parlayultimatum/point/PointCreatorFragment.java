@@ -209,32 +209,30 @@ public class PointCreatorFragment extends Fragment implements View.OnClickListen
     private void createPoint() {
         if (isFieldsValid()) {
             l.d("Creating point");
-            final Point point = new Point();
+            final PointCreatorItem pointCreatorItem = new PointCreatorItem();
             if (isContainerEditTextAvailable()) {
                 Snackbar.make(coordinatorLayout, R.string.point_creator_creating, Snackbar.LENGTH_INDEFINITE)
                         .show();
                 //noinspection ConstantConditions
-                point.setTitle(titleContainer.getEditText().getText().toString());
+                pointCreatorItem.setTitle(titleContainer.getEditText().getText().toString());
                 //noinspection ConstantConditions
-                point.setDescription(descriptionContainer.getEditText().getText().toString());
+                pointCreatorItem.setDescription(descriptionContainer.getEditText().getText().toString());
 
-                List<Point> list = new ArrayList<>();
-                list.add(point);
+                List<PointCreatorItem> list = new ArrayList<>();
+                list.add(pointCreatorItem);
                 AceQLDBManager.insertSQLEntityList(list, new OnUpdateCompleteListener() {
                     @Override
-                    public void onUpdateComplete(int[] results, SQLException e) {
+                    public void onUpdateComplete(int result, SQLException e) {
                         if (e != null) {
                             pointCreatorListener.onCreationFailed();
                             e.printStackTrace();
-                        } else if (results.length == 0) {
-                            l.i("Received result set of length: " + results.length + " with first element indicating: " + results[0] + " updates");
-                            pointCreatorListener.onCreationFailed();
-                        } else if (results[0] > 0) {
-                            l.i("Received result set of length: " + results.length + " with first element indicating: " + results[0] + " updates");
-                            pointCreatorListener.onCreationSuccess();
                         } else {
-                            l.i("Received result set of length: " + results.length + " with first element indicating: " + results[0] + " updates");
-                            pointCreatorListener.onCreationFailed();
+                            l.i("No of rows inserted: " + result);
+                            if (result == 0) {
+                                pointCreatorListener.onCreationFailed();
+                            } else {
+                                pointCreatorListener.onCreationSuccess();
+                            }
                         }
                     }
                 });

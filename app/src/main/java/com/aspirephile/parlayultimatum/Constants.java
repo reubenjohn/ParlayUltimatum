@@ -1,6 +1,19 @@
 package com.aspirephile.parlayultimatum;
 
 public class Constants {
+    public static final class errorResults {
+        public static final String pointNotFound = "POINT_NOT_FOUND";
+        public static final String badPID = "BAD_PID";
+        public static final String badIntent = "BAD_INTENT";
+    }
+
+
+    public static class extras {
+
+        public static final String PID = "PID";
+        public static final String errorResult = "errorResult";
+    }
+
     public static final class preferences {
 
         public static final class pointCreator {
@@ -24,6 +37,6 @@ public class Constants {
     public static class tags {
 
         public static final String pointListFragment = "pointListFragment";
-        public static final String pointCreatorFragment = "pointCreatorFragment";
+        public static final String pointViewerFragment = "pointViewerFragment";
     }
 }

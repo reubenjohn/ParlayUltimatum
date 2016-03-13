@@ -8,8 +8,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.aspirephile.parlayultimatum.R;
-import com.aspirephile.parlayultimatum.point.PointContent.PointItem;
 import com.aspirephile.parlayultimatum.point.PointListFragment.OnListFragmentInteractionListener;
+import com.aspirephile.parlayultimatum.point.PointListItem.PointItem;
 
 import java.util.List;
 

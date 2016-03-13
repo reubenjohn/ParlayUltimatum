@@ -86,13 +86,13 @@ public class PointCreatorActivity extends AppCompatActivity implements PointCrea
     private void openOrganizationCreatorFragment() {
         // find the retained fragment on activity restarts
         FragmentManager fm = getSupportFragmentManager();
-        PointCreatorFragment organizationCreatorF = (PointCreatorFragment) fm.findFragmentByTag(Constants.tags.pointCreatorFragment);
+        PointCreatorFragment organizationCreatorF = (PointCreatorFragment) fm.findFragmentByTag(Constants.tags.pointViewerFragment);
 
         if (!asserter.assertPointerQuietly(organizationCreatorF)) {
             l.i("Creating new " + PointCreatorFragment.class.getSimpleName() + " fragment");
             organizationCreatorF = new PointCreatorFragment();
             fm.beginTransaction()
-                    .replace(R.id.container_organization_creator, organizationCreatorF, Constants.tags.pointCreatorFragment)
+                    .replace(R.id.container_organization_creator, organizationCreatorF, Constants.tags.pointViewerFragment)
                     .commit();
         }
         asserter.assertPointer(organizationCreatorF);

@@ -5,7 +5,7 @@ import org.kawanfw.sql.api.client.android.execute.update.SQLEntity;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class Point implements SQLEntity {
+public class PointCreatorItem implements SQLEntity {
     private String title;
     private String description;
     private String username;

@@ -12,7 +12,7 @@ import java.sql.SQLException;
  * Android template wizards.
  * <p/>
  */
-public class PointContent {
+public class PointListItem {
 
     /**
      * A point item representing a piece of content.

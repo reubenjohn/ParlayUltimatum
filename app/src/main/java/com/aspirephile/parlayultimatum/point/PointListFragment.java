@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.aspirephile.parlayultimatum.R;
-import com.aspirephile.parlayultimatum.point.PointContent.PointItem;
+import com.aspirephile.parlayultimatum.point.PointListItem.PointItem;
 import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
 
@@ -115,7 +115,8 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onRefresh() {
         l.d("onRefresh");
-        swipeRefreshLayout.setRefreshing(true);
+        if (swipeRefreshLayout != null)
+            swipeRefreshLayout.setRefreshing(true);
         String sql = "SELECT PID, " +
                 "username as poster, " +
                 "title, " +
@@ -123,14 +124,14 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
                 "round(100*(select count(*) from VotesPoint where upDown='U' and PID = Point.PID)/((select count(*) from VotesPoint where PID = Point.PID)+0.1),0) as upVotesPercentage, " +
                 "tag1, tag2, tag3, tag4 " +
                 "FROM Point";
-        OnQueryComplete<PointItem> onQueryCompletedListener = new OnQueryComplete<PointItem>() {
+        OnQueryComplete<PointItem> onQueryCompleteListener = new OnQueryComplete<PointItem>() {
             @Override
-            public void onQueryComplete(List<List<PointItem>> list, SQLException e1) {
+            public void onQueryComplete(List<PointItem> list, SQLException e1) {
                 if (e1 != null) {
                     mListener.onPointListLoadFailed(e1);
                 } else {
                     l.i("Point query completed successfully");
-                    pointItems = list.get(0);
+                    pointItems = list;
                     if (asserter.assertPointer(recyclerView))
                         recyclerView.setAdapter(new PointRecyclerViewAdapter(pointItems, mListener));
                 }
@@ -148,7 +149,7 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
                 }
             }
         };
-        AceQLDBManager.getSelectedLists(sql, itemBuilder, onQueryCompletedListener);
+        AceQLDBManager.getSelectedLists(sql, itemBuilder, onQueryCompleteListener);
     }
 
     @Override
@@ -172,7 +173,6 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onPointListItemSelected(PointItem item);
 
         void onPointListLoadFailed(SQLException e);

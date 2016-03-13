@@ -19,9 +19,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.aspirephile.parlayultimatum.point.PointContent;
 import com.aspirephile.parlayultimatum.point.PointCreatorActivity;
 import com.aspirephile.parlayultimatum.point.PointListFragment;
+import com.aspirephile.parlayultimatum.point.PointListItem;
 import com.aspirephile.parlayultimatum.point.PointViewerActivity;
 import com.aspirephile.parlayultimatum.preferences.SettingsActivity;
 import com.aspirephile.shared.debug.Logger;
@@ -173,9 +173,10 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
-    public void onPointListItemSelected(PointContent.PointItem item) {
+    public void onPointListItemSelected(PointListItem.PointItem item) {
         //TODO Open the right point here
         Intent i = new Intent(HomeActivity.this, PointViewerActivity.class);
+        i.putExtra(Constants.extras.PID, item.PID);
         startActivityForResult(i, Constants.codes.result.point_viewer);
     }
 
