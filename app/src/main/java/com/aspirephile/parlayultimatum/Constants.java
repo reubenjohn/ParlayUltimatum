@@ -1,6 +1,16 @@
 package com.aspirephile.parlayultimatum;
 
 public class Constants {
+    public static final class files {
+
+        public static String authentication = "authentication";
+    }
+
+    public static final class properties {
+
+        public static final long splashScreenDuration = 1500;
+    }
+
     public static final class errorResults {
         public static final String pointNotFound = "POINT_NOT_FOUND";
         public static final String badPID = "BAD_PID";
@@ -16,6 +26,9 @@ public class Constants {
 
     public static final class preferences {
 
+        public static final String username = "username";
+        public static final String password = "password";
+
         public static final class pointCreator {
 
             public static final int titleMin = 15;
@@ -26,6 +39,11 @@ public class Constants {
     }
 
     public static final class codes {
+
+        public static final class request {
+
+            public static final int authentication = 1111;
+        }
 
         public static final class result {
 
@@ -38,5 +56,6 @@ public class Constants {
 
         public static final String pointListFragment = "pointListFragment";
         public static final String pointViewerFragment = "pointViewerFragment";
+        public static final String splashFragment = "splashFragment";
     }
 }
