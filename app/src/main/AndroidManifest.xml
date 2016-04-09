@@ -36,6 +36,15 @@
             android:name=".point.PointViewerActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".UserInfoActivity"
+            android:label="@string/title_activity_user_info"
+            android:parentActivityName=".HomeActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.aspirephile.parlayultimatum.HomeActivity" />
+        </activity>
     </application>
 
 </manifest>
