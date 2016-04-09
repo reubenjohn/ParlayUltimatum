@@ -20,9 +20,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -37,6 +35,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.aspirephile.parlayultimatum.preferences.SettingsActivity;
+import com.aspirephile.shared.debug.Logger;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -63,12 +62,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-
+    private Logger l = new Logger(LoginActivity.class);
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -171,9 +165,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
 
         // Reset errors.
         mEmailView.setError(null);
@@ -187,22 +178,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
+//        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+//            mPasswordView.setError(getString(R.string.error_invalid_password));
+//            focusView = mPasswordView;
+//            cancel = true;
+//        }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
         }
+//        else if (!isEmailValid(email)) {
+//            mEmailView.setError(getString(R.string.error_invalid_email));
+//            focusView = mEmailView;
+//            cancel = true;
+//        }
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
@@ -211,16 +203,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
 
             OnGetPrepareStatement onGetPreparedStatement = new OnGetPrepareStatement() {
                 @Override
                 public PreparedStatement onGetPreparedStatement(BackendConnection remoteConnection) {
-                    String sql = "select username,password from ParlayUser where username=? and password=?";
+                    String sql = "select username from ParlayUser where username=?";
                     try {
                         PreparedStatement preparedStatement = remoteConnection.prepareStatement(sql);
-                        preparedStatement.setString(0, email);
-                        preparedStatement.setString(1, password);
+                        preparedStatement.setString(1, email);
+//                        preparedStatement.setString(2, password);
                         return preparedStatement;
                     } catch (SQLException e) {
                         e.printStackTrace();
@@ -234,7 +225,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 public void onGetResultSet(ResultSet rs, SQLException e) {
                     showProgress(false);
 
+                    l.d("On Result: " + rs + e);
+
                     if (e != null) {
+                        e.printStackTrace();
                         mPasswordView.setError(getString(R.string.error_incorrect_password));
                         mPasswordView.requestFocus();
                         return;
@@ -242,12 +236,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     try {
                         rs.next();
-                        String retrieved_username = rs.getString(0);
-                        String retrieved_password = rs.getString(1);
-                        if (email.equals(retrieved_username) && password.equals(retrieved_password)) {
+                        String retrieved_username = rs.getString(1);
+//                        String retrieved_password = rs.getString(1);
+                        if (email.equals(retrieved_username)) {
                             SharedPreferences sp = getSharedPreferences(Constants.files.authentication, MODE_PRIVATE);
                             sp.edit().putString(Constants.preferences.username, email)
-                                    .putString(Constants.preferences.password, password)
+//                                    .putString(Constants.preferences.password, password)
                                     .commit();
                             setResult(RESULT_OK);
                             finish();
@@ -262,6 +256,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     }
                 }
             };
+            l.d("Executing query");
+            showProgress(true);
             AceQLDBManager.executeQuery(onGetPreparedStatement, onGetResultSet);
         }
     }
@@ -398,6 +394,30 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         client.disconnect();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.login, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.login_action_settings) {
+            Intent i = new Intent(LoginActivity.this, SettingsActivity.class);
+            startActivity(i);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     private interface ProfileQuery {
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
@@ -437,76 +457,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(List<String> emailAddressCollection) {
             addEmailsToAutoComplete(emailAddressCollection);
         }
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.home, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.home_action_settings) {
-            Intent i = new Intent(LoginActivity.this, SettingsActivity.class);
-            startActivity(i);
-            return true;
-        } else if (id == R.id.home_action_search) {
-
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
 }
