@@ -186,6 +186,7 @@
     <string name="point_list_fetch_failed">Failed to fetch the points</string>
     <string name="retry">Retry</string>
     <string name="feature_not_available">This feature is not yet available</string>
+
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
@@ -201,4 +202,12 @@
         completions."
     </string>
     <string name="authentication_failed">Authentication failed!</string>
+
+    <!--User Info-->
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_user_info">UserInfoActivity</string>
+    <string name="user_first_name">First Name:</string>
+    <string name="user_last_name">Last Name:</string>
+    <string name="user_info_save_changes">Save Changes</string>
+    <string name="user_username">Username:</string>
 </resources>
