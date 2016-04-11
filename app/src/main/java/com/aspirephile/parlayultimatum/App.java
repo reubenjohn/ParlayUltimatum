@@ -17,7 +17,11 @@ public class App extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
         l.d(App.class.getSimpleName() + " being created");
-        AceQLDBManager.initialize(getString(R.string.pref_default_data_sync_backend_url),
+
+        String url = getSharedPreferences(Constants.files.settings, MODE_WORLD_READABLE)
+                .getString(Constants.preferences.url, getString(R.string.pref_default_data_sync_backend_url));
+
+        AceQLDBManager.initialize(url,
                 "reuben", "pass");
     }
 

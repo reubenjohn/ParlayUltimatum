@@ -21,7 +21,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.aspirephile.parlayultimatum.Constants;
 import com.aspirephile.parlayultimatum.R;
+
 import org.kawanfw.sql.api.client.android.OnRemoteConnectionEstablishedListener;
 import org.kawanfw.sql.api.client.android.BackendConnection;
 import org.kawanfw.sql.api.client.android.AceQLDBManager;
@@ -288,9 +290,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                     });
                                 }
                             });
-                            if (connection != null)
+                            if (connection != null) {
                                 preference.setSummary(url);
-                            else
+                                getActivity().getSharedPreferences(Constants.files.settings, Context.MODE_WORLD_WRITEABLE)
+                                        .edit()
+                                        .putString(Constants.preferences.url, url)
+                                        .apply();
+                            } else
                                 preference
                                         .setSummary(getString(R.string.setting_data_sync_backend_url_error)
                                                 + " " + url);

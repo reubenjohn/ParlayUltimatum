@@ -4,6 +4,7 @@ public class Constants {
     public static final class files {
 
         public static String authentication = "authentication";
+        public static String settings = "settings";
     }
 
     public static final class properties {
@@ -28,6 +29,7 @@ public class Constants {
 
         public static final String username = "username";
         public static final String password = "password";
+        public static final String url = "url";
 
         public static final class pointCreator {
 

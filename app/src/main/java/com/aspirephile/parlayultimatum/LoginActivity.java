@@ -22,17 +22,13 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.aspirephile.parlayultimatum.preferences.SettingsActivity;
 import com.aspirephile.shared.debug.Logger;
@@ -64,8 +60,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private static final int REQUEST_READ_CONTACTS = 0;
     private Logger l = new Logger(LoginActivity.class);
     // UI references.
-    private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
+    private AutoCompleteTextView mUsernameView;
     private View mProgressView;
     private View mLoginFormView;
     /**
@@ -79,20 +74,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mUsernameView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
-
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -131,7 +114,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return true;
         }
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+            Snackbar.make(mUsernameView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                     .setAction(android.R.string.ok, new OnClickListener() {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
@@ -167,12 +150,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void attemptLogin() {
 
         // Reset errors.
-        mEmailView.setError(null);
-        mPasswordView.setError(null);
+        mUsernameView.setError(null);
 
         // Store values at the time of the login attempt.
-        final String email = mEmailView.getText().toString();
-        final String password = mPasswordView.getText().toString();
+        final String email = mUsernameView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -186,13 +167,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
+            mUsernameView.setError(getString(R.string.error_field_required));
+            focusView = mUsernameView;
             cancel = true;
         }
 //        else if (!isEmailValid(email)) {
-//            mEmailView.setError(getString(R.string.error_invalid_email));
-//            focusView = mEmailView;
+//            mUsernameView.setError(getString(R.string.error_invalid_email));
+//            focusView = mUsernameView;
 //            cancel = true;
 //        }
 
@@ -229,14 +210,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     if (e != null) {
                         e.printStackTrace();
-                        mPasswordView.setError(getString(R.string.error_incorrect_password));
-                        mPasswordView.requestFocus();
+                        mUsernameView.setError(e.getLocalizedMessage());
+                        mUsernameView.requestFocus();
                         return;
                     }
 
                     try {
                         rs.next();
-                        String retrieved_username = rs.getString(0);
+                        String retrieved_username = rs.getString(1);
 //                        String retrieved_password = rs.getString(1);
                         if (email.equals(retrieved_username)) {
                             SharedPreferences sp = getSharedPreferences(Constants.files.authentication, MODE_PRIVATE);
@@ -246,13 +227,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             setResult(RESULT_OK);
                             finish();
                         } else {
-                            mPasswordView.setError(getString(R.string.error_incorrect_password));
-                            mPasswordView.requestFocus();
+                            mUsernameView.setError(getString(R.string.error_incorrect_username));
+                            mUsernameView.requestFocus();
                         }
                     } catch (SQLException e1) {
                         e1.printStackTrace();
-                        mPasswordView.setError(getString(R.string.error_incorrect_password));
-                        mPasswordView.requestFocus();
+                        mUsernameView.setError(e1.getLocalizedMessage());
+
+                        mUsernameView.requestFocus();
                     }
                 }
             };
@@ -351,7 +333,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
-        mEmailView.setAdapter(adapter);
+        mUsernameView.setAdapter(adapter);
     }
 
     @Override
