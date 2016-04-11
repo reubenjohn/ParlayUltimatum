@@ -209,4 +209,5 @@
     <string name="user_last_name">Last Name:</string>
     <string name="user_info_save_changes">Save Changes</string>
     <string name="user_username">Username:</string>
+    <string name="user_info_update_success">Profile update successful</string>
 </resources>

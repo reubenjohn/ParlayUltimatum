@@ -68,6 +68,15 @@ public class HomeActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        View v = navigationView.getHeaderView(0);
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(HomeActivity.this,UserInfoActivity.class);
+                startActivity(i);
+            }
+        });
+
         openPointListFragment();
     }
 

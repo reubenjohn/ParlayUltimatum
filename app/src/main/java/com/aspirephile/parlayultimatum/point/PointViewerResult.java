@@ -23,6 +23,9 @@ public class PointViewerResult {
     private final String tag1, tag2, tag3, tag4;
 
     public PointViewerResult(ResultSet rs, Context context) throws SQLException {
+        if (context == null)
+            throw new IllegalArgumentException("Cannot provide a null context!");
+
         PID = String.valueOf(rs.getInt("PID"));
         poster = rs.getString("poster");
         title = rs.getString("title");
