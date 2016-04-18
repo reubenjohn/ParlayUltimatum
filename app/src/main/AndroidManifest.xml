@@ -55,9 +55,10 @@
             android:value="@integer/google_play_services_version" />
         <activity
             android:name=".UserInfoActivity"
-            android:label="@string/title_activity_user_info"
+            android:label="@string/profile_setting_user"
             android:parentActivityName=".HomeActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.aspirephile.parlayultimatum.HomeActivity" />

@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.aspirephile.parlayultimatum.db.tables.ParlayUser;
 
@@ -31,6 +31,8 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
     private CoordinatorLayout coordinatorLayout;
     private EditText editTextFirst;
     private EditText editTextLast;
+    private String username;
+    private TextView tUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,9 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_user_info);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        username = getSharedPreferences(Constants.files.authentication, Context.MODE_PRIVATE)
+                .getString(Constants.preferences.username, null);
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.cl_user_info);
 
@@ -62,6 +67,7 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
 
         editTextFirst = (EditText) findViewById(R.id.editTextFname);
         editTextLast = (EditText) findViewById(R.id.editTextLname);
+        tUsername = (TextView) findViewById(R.id.textViewUsername);
 
         AceQLDBManager.executeQuery(new OnGetPrepareStatement() {
             @Override
@@ -69,8 +75,7 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
                 String sql = "select * from ParlayUser where username=?";
                 try {
                     PreparedStatement preparedStatement = remoteConnection.prepareStatement(sql);
-                    String username = getSharedPreferences(Constants.files.authentication, Context.MODE_PRIVATE)
-                            .getString(Constants.preferences.username, null);
+
                     if (username != null) {
                         preparedStatement.setString(1, username);
                     } else {
@@ -95,6 +100,7 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
                             .show();
                 } else {
                     try {
+                        rs.next();
                         ParlayUser user = new ParlayUser(rs);
                         updateProfile(user);
                     } catch (SQLException e1) {
@@ -110,8 +116,11 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
     private void updateProfile(ParlayUser user) {
         Snackbar.make(coordinatorLayout, user.toString(), Snackbar.LENGTH_LONG)
                 .show();
+        tUsername.setText(user.username);
+        editTextFirst.setText(user.fName);
+        editTextLast.setText(user.lName);
+
     }
-//Get username from backend and put it on the screen
 
     public void onActivityResult(int resCode, int reqCode, Intent data) {
         if (resCode == RESULT_OK)        //If user presses back button
@@ -126,12 +135,13 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
         OnGetPrepareStatement preparedStatementListener = new OnGetPrepareStatement() {
             @Override
             public PreparedStatement onGetPreparedStatement(BackendConnection remoteConnection) {
-                String sql = "update table_name set fname=?,lname=? where username=?";
+                String sql = "update ParlayUser set fname=?,lname=? where username=?";
                 PreparedStatement preparedStatement = null;
                 try {
                     preparedStatement = remoteConnection.prepareStatement(sql);
-                    preparedStatement.setString(0, fname);
-                    preparedStatement.setString(1, lname);
+                    preparedStatement.setString(1, fname);
+                    preparedStatement.setString(2, lname);
+                    preparedStatement.setString(3, username);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -141,8 +151,14 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
         OnUpdateCompleteListener onUpdateCompleteListener = new OnUpdateCompleteListener() {
             @Override
             public void onUpdateComplete(int result, SQLException e) {
-                Snackbar.make(coordinatorLayout, R.string.user_info_update_success, Snackbar.LENGTH_LONG)
-                        .show();
+                if (e != null) {
+                    e.printStackTrace();
+                    Snackbar.make(coordinatorLayout, e.getLocalizedMessage(), Snackbar.LENGTH_LONG)
+                            .show();
+                } else {
+                    Snackbar.make(coordinatorLayout, R.string.user_info_update_success, Snackbar.LENGTH_LONG)
+                            .show();
+                }
             }
         };
         AceQLDBManager.executeUpdate(preparedStatementListener, onUpdateCompleteListener);

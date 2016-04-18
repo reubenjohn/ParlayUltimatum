@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.aspirephile.pocketticket.organizer.organization"
+    tools:context=".point.PointViewerActivity"
     tools:showIn="@layout/fragment_point_viewer">
 
     <FrameLayout
