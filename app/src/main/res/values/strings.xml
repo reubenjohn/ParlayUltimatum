@@ -214,4 +214,6 @@
     <string name="profile_pic">Profile Picture</string>
     <string name="profile_setting_user">Profile Settings</string>
     <string name="content_description_contact">Contact Profile Picture</string>
+    <string name="point_viewer_for">For</string>
+    <string name="point_viewer_against">Against</string>
 </resources>

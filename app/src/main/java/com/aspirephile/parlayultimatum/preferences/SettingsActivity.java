@@ -24,9 +24,9 @@ import android.view.MenuItem;
 import com.aspirephile.parlayultimatum.Constants;
 import com.aspirephile.parlayultimatum.R;
 
-import org.kawanfw.sql.api.client.android.OnRemoteConnectionEstablishedListener;
-import org.kawanfw.sql.api.client.android.BackendConnection;
 import org.kawanfw.sql.api.client.android.AceQLDBManager;
+import org.kawanfw.sql.api.client.android.BackendConnection;
+import org.kawanfw.sql.api.client.android.OnRemoteConnectionEstablishedListener;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -258,8 +258,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     = new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(final Preference preference, final Object newValue) {
-                    preference.setSummary(getString(R.string.setting_data_sync_backend_url_connecting));
                     final String url = newValue.toString();
+                    Log.i("SettingsActivity", "Attempting to connect to: " + url);
+                    preference.setSummary(getString(R.string.setting_data_sync_backend_url_connecting));
                     final long start = System.currentTimeMillis();
 
                     AceQLDBManager.getRemoteConnection(url, new OnRemoteConnectionEstablishedListener() {
@@ -276,16 +277,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                             e.printStackTrace();
                                         }
 
-                                    Log.i("SettingsActivity", "Persisted 'Connecting...'");
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            if (connection != null)
+                                            if (connection != null) {
+                                                Log.i("SettingsActivity", "Connection to " + url + " established");
                                                 preference.setSummary(url);
-                                            else
+                                            } else {
+                                                Log.i("SettingsActivity", "Connection to " + url + " failed");
                                                 preference
                                                         .setSummary(getString(R.string.setting_data_sync_backend_url_error)
                                                                 + " " + url);
+                                            }
                                         }
                                     });
                                 }

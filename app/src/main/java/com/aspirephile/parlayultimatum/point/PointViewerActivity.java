@@ -14,7 +14,7 @@ import com.aspirephile.shared.debug.NullPointerAsserter;
 
 import java.sql.SQLException;
 
-public class PointViewerActivity extends AppCompatActivity implements PointViewerFragment.OnFragmentInteractionListener {
+public class PointViewerActivity extends AppCompatActivity implements PointViewerFragment.OnFragmentInteractionListener, PointListFragment.OnListFragmentInteractionListener {
 
     private Logger l = new Logger(PointViewerActivity.class);
 
@@ -95,5 +95,15 @@ public class PointViewerActivity extends AppCompatActivity implements PointViewe
         Intent data = new Intent();
         data.putExtra(Constants.extras.errorResult, Constants.errorResults.pointNotFound);
         setResult(RESULT_CANCELED, data);
+    }
+
+    @Override
+    public void onPointListItemSelected(PointListItem.PointItem item) {
+        l.d("Loaded item: " + item);
+    }
+
+    @Override
+    public void onPointListLoadFailed(SQLException e) {
+        e.printStackTrace();
     }
 }

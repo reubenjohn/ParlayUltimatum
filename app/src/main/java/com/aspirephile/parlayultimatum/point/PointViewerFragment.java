@@ -7,11 +7,13 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.aspirephile.parlayultimatum.Constants;
 import com.aspirephile.parlayultimatum.R;
 import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
@@ -37,6 +39,7 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
     private TextView descriptionView;
     private String PID;
     private PointViewerResult pointViewerResult;
+    private PointListFragment forListF, againstListF;
 
     public PointViewerFragment() {
         l.onConstructor();
@@ -186,6 +189,37 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
                 Snackbar.make(view, R.string.feature_not_available, Snackbar.LENGTH_LONG).show();
             }
         });
+
+        openForListFragment();
+        openAgainstListFragment();
+    }
+
+    private void openForListFragment() {
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        forListF = (PointListFragment) fm.findFragmentByTag(Constants.tags.pointListForFragment);
+
+        if (!asserter.assertPointerQuietly(forListF)) {
+            l.i("Creating new " + PointListFragment.class.getSimpleName() + " fragment");
+            forListF = PointListFragment.newInstance(1);
+            fm.beginTransaction()
+                    .replace(R.id.container_point_viewer_for, forListF, Constants.tags.pointListForFragment)
+                    .commit();
+        }
+    }
+
+    private void openAgainstListFragment() {
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        againstListF = (PointListFragment) fm.findFragmentByTag(Constants.tags.pointListAgainstFragment);
+
+        if (!asserter.assertPointerQuietly(againstListF)) {
+            l.i("Creating new " + PointListFragment.class.getSimpleName() + " fragment");
+            againstListF = PointListFragment.newInstance(1);
+            fm.beginTransaction()
+                    .replace(R.id.container_point_viewer_against, againstListF, Constants.tags.pointListAgainstFragment)
+                    .commit();
+        }
     }
 
     private void updateViews(PointViewerResult point) {
