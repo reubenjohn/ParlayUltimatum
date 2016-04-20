@@ -4,4 +4,5 @@
     <color name="colorPrimaryDark">#002845</color>
     <color name="colorAccent">#115f93</color>
     <color name="holo_red_light">#ffff4444</color>
+    <color name="white">#EEEEEE</color>
 </resources>

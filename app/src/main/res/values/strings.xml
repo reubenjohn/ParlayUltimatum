@@ -216,4 +216,6 @@
     <string name="content_description_contact">Contact Profile Picture</string>
     <string name="point_viewer_for">For</string>
     <string name="point_viewer_against">Against</string>
+    <string name="show_comments">Show Comments</string>
+    <string name="comments">Comments</string>
 </resources>
