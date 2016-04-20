@@ -1,6 +1,7 @@
 package com.aspirephile.parlayultimatum.point;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -11,10 +12,12 @@ import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.aspirephile.parlayultimatum.Constants;
 import com.aspirephile.parlayultimatum.R;
+import com.aspirephile.parlayultimatum.comment.CommentListActivity;
 import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
 
@@ -40,6 +43,7 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
     private String PID;
     private PointViewerResult pointViewerResult;
     private PointListFragment forListF, againstListF;
+    private Button commentB;
 
     public PointViewerFragment() {
         l.onConstructor();
@@ -177,6 +181,8 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
 
         editFab = (FloatingActionButton) v.findViewById(R.id.fab_point_viewer_edit);
 
+        commentB = (Button) v.findViewById(R.id.b_point_viewer_comments);
+
         l.bridgeXML(asserter.assertPointer(coordinatorLayout, collapsingToolbarLayout, descriptionView, editFab));
     }
 
@@ -189,6 +195,8 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
                 Snackbar.make(view, R.string.feature_not_available, Snackbar.LENGTH_LONG).show();
             }
         });
+
+        commentB.setOnClickListener(this);
 
         openForListFragment();
         openAgainstListFragment();
@@ -238,6 +246,11 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
         int id = v.getId();
         if (id == R.id.fab_point_creator) {
             editPoint();
+        } else if (id == R.id.b_point_viewer_comments) {
+            l.d("Opening comments");
+            Intent i = new Intent(getActivity(), CommentListActivity.class);
+            i.putExtra(Constants.extras.PID, PID);
+            startActivity(i);
         } else {
             l.w("Unhandled view clicked with ID: " + v.getId());
         }

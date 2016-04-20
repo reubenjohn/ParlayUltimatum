@@ -282,27 +282,32 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                         public void run() {
                                             if (connection != null) {
                                                 Log.i("SettingsActivity", "Connection to " + url + " established");
-                                                preference.setSummary(url);
+                                                if (isAdded())
+                                                    preference.setSummary(url);
                                             } else {
                                                 Log.i("SettingsActivity", "Connection to " + url + " failed");
-                                                preference
-                                                        .setSummary(getString(R.string.setting_data_sync_backend_url_error)
-                                                                + " " + url);
+                                                if (isAdded())
+                                                    preference
+                                                            .setSummary(getString(R.string.setting_data_sync_backend_url_error)
+                                                                    + " " + url);
                                             }
                                         }
                                     });
                                 }
                             });
                             if (connection != null) {
-                                preference.setSummary(url);
+                                if (isAdded())
+                                    preference.setSummary(url);
                                 getActivity().getSharedPreferences(Constants.files.settings, Context.MODE_WORLD_WRITEABLE)
                                         .edit()
                                         .putString(Constants.preferences.url, url)
                                         .apply();
-                            } else
-                                preference
-                                        .setSummary(getString(R.string.setting_data_sync_backend_url_error)
-                                                + " " + url);
+                            } else {
+                                if (isAdded())
+                                    preference
+                                            .setSummary(getString(R.string.setting_data_sync_backend_url_error)
+                                                    + " " + url);
+                            }
                         }
                     });
 

@@ -216,4 +216,8 @@
     <string name="content_description_contact">Contact Profile Picture</string>
     <string name="point_viewer_for">For</string>
     <string name="point_viewer_against">Against</string>
+    <string name="show_comments">Show Comments</string>
+    <string name="comments">Comments</string>
+    <string name="sample_timestamp">4 hours ago</string>
+    <string name="sample_comment_description">Please elaborate. What you are saying doesn\'t seem to have enough merit to it. If you need more support please be clear.</string>
 </resources>
