@@ -31,7 +31,7 @@ public class PointRecyclerViewAdapter extends RecyclerView.Adapter<PointRecycler
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_item_point, parent, false);
+                .inflate(R.layout.list_item_point, parent, false);
         return new ViewHolder(view);
     }
 
