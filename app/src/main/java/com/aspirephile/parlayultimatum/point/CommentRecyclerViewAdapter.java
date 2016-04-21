@@ -4,7 +4,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.aspirephile.parlayultimatum.R;
@@ -69,9 +68,9 @@ public class CommentRecyclerViewAdapter extends RecyclerView.Adapter<CommentRecy
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            descView = (TextView) view.findViewById(R.id.tv_item_comment_desc);
-            timestampView = (TextView) view.findViewById(R.id.tv_item_comment_timestamp);
-            usernameView = (TextView) view.findViewById(R.id.rv_item_comment_username);             //What to do?
+            descView = (TextView) view.findViewById(R.id.tv_item_point_views);
+            timestampView = (TextView) view.findViewById(R.id.tv_item_point_views);
+            usernameView = (TextView) view.findViewById(R.id.tv_item_point_views);             //What to do?
         }
 
     }
