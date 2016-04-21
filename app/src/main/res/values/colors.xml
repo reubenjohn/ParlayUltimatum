@@ -5,4 +5,5 @@
     <color name="colorAccent">#115f93</color>
     <color name="holo_red_light">#ffff4444</color>
     <color name="white">#EEEEEE</color>
+    <color name="white_pure">#FFFFFF</color>
 </resources>
