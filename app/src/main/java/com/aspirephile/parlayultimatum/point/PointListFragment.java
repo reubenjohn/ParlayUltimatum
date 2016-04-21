@@ -2,6 +2,7 @@ package com.aspirephile.parlayultimatum.point;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
@@ -18,9 +19,11 @@ import com.aspirephile.shared.debug.Logger;
 import com.aspirephile.shared.debug.NullPointerAsserter;
 
 import org.kawanfw.sql.api.client.android.AceQLDBManager;
-import org.kawanfw.sql.api.client.android.execute.query.ItemBuilder;
-import org.kawanfw.sql.api.client.android.execute.query.OnQueryComplete;
+import org.kawanfw.sql.api.client.android.BackendConnection;
+import org.kawanfw.sql.api.client.android.execute.OnGetPrepareStatement;
+import org.kawanfw.sql.api.client.android.execute.query.OnGetResultSetListener;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -36,6 +39,8 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
+    private static final String ARG_PID = "PID";
+    private static final String ARG_STANDING = "STANDING";
     private Logger l = new Logger(PointListFragment.class);
     private NullPointerAsserter asserter = new NullPointerAsserter(l);
 
@@ -44,6 +49,8 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
     private List<PointItem> pointItems = new ArrayList<>();
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private String PID;
+    private char standing = '\0';
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -52,12 +59,20 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
     public PointListFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
     public static PointListFragment newInstance(int columnCount) {
         PointListFragment fragment = new PointListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static PointListFragment newInstance(int columnCount, @NonNull String PID, char standing) {
+        PointListFragment fragment = new PointListFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARG_COLUMN_COUNT, columnCount);
+        args.putString(ARG_PID, PID);
+        args.putChar(ARG_STANDING, standing);
         fragment.setArguments(args);
         return fragment;
     }
@@ -67,11 +82,14 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
         l.onCreate();
         super.onCreate(savedInstanceState);
 
-        onRefresh();
-
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
+            PID = getArguments().getString(ARG_PID);
+            standing = getArguments().getChar(ARG_STANDING);
         }
+
+        onRefresh();
+
     }
 
     @Override
@@ -117,39 +135,63 @@ public class PointListFragment extends Fragment implements SwipeRefreshLayout.On
         l.d("onRefresh");
         if (swipeRefreshLayout != null)
             swipeRefreshLayout.setRefreshing(true);
-        String sql = "SELECT PID, " +
-                "username as poster, " +
-                "title, " +
-                "(select count(*) from PointView where PID = Point.PID) as views, " +
-                "round(100*(select count(*) from VotesPoint where upDown='U' and PID = Point.PID)/((select count(*) from VotesPoint where PID = Point.PID)+0.1),0) as upVotesPercentage, " +
-                "tag1, tag2, tag3, tag4 " +
-                "FROM Point";
-        OnQueryComplete<PointItem> onQueryCompleteListener = new OnQueryComplete<PointItem>() {
+
+        OnGetPrepareStatement getPreparedStatementListener = new OnGetPrepareStatement() {
             @Override
-            public void onQueryComplete(List<PointItem> list, SQLException e1) {
-                if (e1 != null) {
-                    mListener.onPointListLoadFailed(e1);
-                } else {
-                    l.i("Point query completed successfully");
-                    pointItems = list;
-                    if (asserter.assertPointer(recyclerView))
-                        recyclerView.setAdapter(new PointRecyclerViewAdapter(pointItems, mListener));
-                }
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        };
-        ItemBuilder<PointItem> itemBuilder = new ItemBuilder<PointItem>() {
-            @Override
-            public PointItem buildItem(ResultSet rs) {
+            public PreparedStatement onGetPreparedStatement(BackendConnection remoteConnection) {
                 try {
-                    return new PointItem(rs, getContext());
+                    String sql;
+                    PreparedStatement preparedStatement;
+                    if (standing != '\0') {
+                        sql = "SELECT * from Topic " +
+                                "where PID in " +
+                                "(" +
+                                "select child from PointRole " +
+                                "where " +
+                                "parent=? " +
+                                "and " +
+                                "standing=? " +
+                                ");";
+                        preparedStatement = remoteConnection.prepareStatement(sql);
+                        preparedStatement.setString(1, PID);
+                        preparedStatement.setString(2, String.valueOf(standing));
+                    } else {
+                        sql = "SELECT * FROM Topic";
+                        preparedStatement = remoteConnection.prepareStatement(sql);
+                    }
+                    return preparedStatement;
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    mListener.onPointListLoadFailed(e);
                     return null;
                 }
             }
         };
-        AceQLDBManager.getSelectedLists(sql, itemBuilder, onQueryCompleteListener);
+
+        OnGetResultSetListener onGetResultSetListener = new OnGetResultSetListener() {
+            @Override
+            public void onGetResultSet(ResultSet rs, SQLException e) {
+                if (e != null) {
+                    mListener.onPointListLoadFailed(e);
+                } else {
+                    ArrayList<PointItem> list = new ArrayList<>();
+                    Context context = getContext();
+                    try {
+                        while (rs.next()) {
+                            list.add(new PointItem(rs, context));
+                        }
+
+                        l.i("Point query completed with " + list.size() + " results");
+                        if (asserter.assertPointer(recyclerView))
+                            recyclerView.setAdapter(new PointRecyclerViewAdapter(list, mListener));
+                        swipeRefreshLayout.setRefreshing(false);
+
+                    } catch (SQLException e1) {
+                        mListener.onPointListLoadFailed(e1);
+                    }
+                }
+            }
+        };
+        AceQLDBManager.executeQuery(getPreparedStatementListener, onGetResultSetListener);
     }
 
     @Override

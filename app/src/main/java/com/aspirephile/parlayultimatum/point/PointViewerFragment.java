@@ -70,15 +70,7 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
             @Override
             public PreparedStatement onGetPreparedStatement(BackendConnection remoteConnection) {
 
-                String sql = "SELECT PID, " +
-                        "username as poster, " +
-                        "title, " +
-                        "description, " +
-                        "timestamp, " +
-                        "(select count(*) from PointView where PID = Point.PID) as views, " +
-                        "round(100*(select count(*) from VotesPoint where upDown='U' and PID = Point.PID)/((select count(*) from VotesPoint where PID = Point.PID)+0.1),0) as upVotesPercentage, " +
-                        "tag1, tag2, tag3, tag4 " +
-                        "FROM Point where PID = ?";
+                String sql = "SELECT * from Topic where PID = ?";
                 PreparedStatement preparedStatement = null;
                 try {
                     preparedStatement = remoteConnection.prepareStatement(sql);
@@ -209,7 +201,7 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
 
         if (!asserter.assertPointerQuietly(forListF)) {
             l.i("Creating new " + PointListFragment.class.getSimpleName() + " fragment");
-            forListF = PointListFragment.newInstance(1);
+            forListF = PointListFragment.newInstance(1, PID, 'S');
             fm.beginTransaction()
                     .replace(R.id.container_point_viewer_for, forListF, Constants.tags.pointListForFragment)
                     .commit();

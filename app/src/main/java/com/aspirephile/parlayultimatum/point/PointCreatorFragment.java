@@ -213,6 +213,8 @@ public class PointCreatorFragment extends Fragment implements View.OnClickListen
             if (isContainerEditTextAvailable()) {
                 Snackbar.make(coordinatorLayout, R.string.point_creator_creating, Snackbar.LENGTH_INDEFINITE)
                         .show();
+                pointCreatorItem.setUsername(getActivity().getSharedPreferences(Constants.files.authentication, Context.MODE_PRIVATE)
+                        .getString(Constants.preferences.username, null));
                 //noinspection ConstantConditions
                 pointCreatorItem.setTitle(titleContainer.getEditText().getText().toString());
                 //noinspection ConstantConditions
