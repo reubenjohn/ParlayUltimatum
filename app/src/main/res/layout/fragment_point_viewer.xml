@@ -57,6 +57,30 @@
                 android:text="@string/show_comments"
                 android:textColor="@color/white" />
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/image_button_like"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:background="@color/white_pure"
+                    android:src="@drawable/selector_button_like" />
+
+                <ImageButton
+                    android:id="@+id/image_button_dislike"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="false"
+                    android:layout_alignParentRight="true"
+                    android:layout_gravity="right"
+                    android:background="@color/white_pure"
+                    android:src="@drawable/selector_button_dislike" />
+
+            </RelativeLayout>
+
             <TextView
                 android:id="@+id/tv_point_viewer_description"
                 android:layout_width="wrap_content"

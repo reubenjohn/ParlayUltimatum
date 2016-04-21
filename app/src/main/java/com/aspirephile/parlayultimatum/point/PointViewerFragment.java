@@ -2,6 +2,7 @@ package com.aspirephile.parlayultimatum.point;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -13,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.aspirephile.parlayultimatum.Constants;
@@ -25,10 +27,12 @@ import org.kawanfw.sql.api.client.android.AceQLDBManager;
 import org.kawanfw.sql.api.client.android.BackendConnection;
 import org.kawanfw.sql.api.client.android.execute.OnGetPrepareStatement;
 import org.kawanfw.sql.api.client.android.execute.query.OnGetResultSetListener;
+import org.kawanfw.sql.api.client.android.execute.update.OnUpdateCompleteListener;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 public class PointViewerFragment extends Fragment implements View.OnClickListener {
 
@@ -41,9 +45,12 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
     private FloatingActionButton editFab;
     private TextView descriptionView;
     private String PID;
+    private String username;
     private PointViewerResult pointViewerResult;
     private PointListFragment forListF, againstListF;
     private Button commentB;
+    private ImageButton imageButtonLike;
+    private ImageButton imageButtonDislike;
 
     public PointViewerFragment() {
         l.onConstructor();
@@ -105,7 +112,48 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
         };
         AceQLDBManager.executeQuery(onGetPreparedStatementListener, onGetResultSetListener);
 
+        OnGetPrepareStatement sql = new OnGetPrepareStatement() {
+            @Override
+            public PreparedStatement onGetPreparedStatement(BackendConnection remoteConnection) {
+                PreparedStatement preparedStatement = null;
+                try {
+                    preparedStatement = remoteConnection.prepareStatement("Select updown from votespoint where username=? and PID=?");
+                    preparedStatement.setString(1, username);
+                    preparedStatement.setString(2, PID);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                return preparedStatement;
+            }
+        };
+        OnGetResultSetListener onGetResult = new OnGetResultSetListener() {
+            @Override
+            public void onGetResultSet(ResultSet rs, SQLException e) {
+                if (e != null) {
+                    fragmentInteractionListener.onFetchFailed(e);
+                } else {
+                    try {
+                        if (rs.next()) {
+                            String ans = rs.getString("updown");
+                            l.i(ans);
+                            if ("U".equals(ans)) {
+                                imageButtonLike.setColorFilter(Color.rgb(0, 100, 0));
+                            } else if ("D".equals(ans)) {
+                                imageButtonDislike.setColorFilter(Color.rgb(100, 0, 0));
+                            }
+                        } else {
+                            l.i("Error: COLOR NOT CHANGED, SOME RESULTSET SHIT. WHAT MAN.");
+                        }
+                    } catch (SQLException e1) {
+                        e1.printStackTrace();
+                        fragmentInteractionListener.onFetchFailed(e1);
+                    }
+                }
+            }
+        };
+        AceQLDBManager.executeQuery(sql, onGetResult);
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -117,6 +165,10 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
         initializeFields();
         if (pointViewerResult != null)
             updateViews(pointViewerResult);
+        imageButtonLike = (ImageButton) v.findViewById(R.id.image_button_like);
+        imageButtonDislike = (ImageButton) v.findViewById(R.id.image_button_dislike);
+        imageButtonDislike.setOnClickListener(this);
+        imageButtonLike.setOnClickListener(this);
         return v;
     }
 
@@ -233,6 +285,78 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
         Snackbar.make(coordinatorLayout, R.string.feature_not_available, Snackbar.LENGTH_SHORT).show();
     }
 
+    public void performVote(final String updown) {
+        username = getActivity().getSharedPreferences(Constants.files.authentication, Context.MODE_PRIVATE)
+                .getString(Constants.preferences.username, null);
+
+        OnGetPrepareStatement ac = new OnGetPrepareStatement() {
+            @Override
+            public PreparedStatement onGetPreparedStatement(BackendConnection remoteConnection) {
+                PreparedStatement preparedStatement = null;
+                try {
+                    preparedStatement = remoteConnection.prepareStatement("DELETE FROM votespoint where username=? and PID=?");
+                    preparedStatement.setString(1, username);
+                    preparedStatement.setString(2, PID);
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                return preparedStatement;
+            }
+        };
+        OnUpdateCompleteListener abc = new OnUpdateCompleteListener() {
+            @Override
+            public void onUpdateComplete(final int result, SQLException e) {
+                if (e != null) {
+                    e.printStackTrace();
+                } else {
+                    l.d("Result: deleted " + result + " rows.");
+                    OnGetPrepareStatement onGetPreparedStatement = new OnGetPrepareStatement() {
+                        @Override
+                        public PreparedStatement onGetPreparedStatement(BackendConnection remoteConnection) {
+                            PreparedStatement preparedStatement = null;
+
+                            try {
+                                preparedStatement = remoteConnection.prepareStatement("INSERT INTO votespoint VALUES(?,?,?,?)");
+                                preparedStatement.setString(1, username);
+                                preparedStatement.setString(2, PID);
+                                preparedStatement.setString(3, updown);
+                                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                                preparedStatement.setTimestamp(4, timestamp);
+                            } catch (SQLException e1) {
+                                e1.printStackTrace();
+                            }
+
+                            return preparedStatement;
+                        }
+                    };
+                    OnUpdateCompleteListener onUpdateCompleted = new OnUpdateCompleteListener() {
+                        @Override
+                        public void onUpdateComplete(int result, SQLException e) {
+
+                            if (e != null) {
+                                l.i("Some Error has occured. HELP");
+                            } else {
+                                if (updown.equals("D")) {
+                                    imageButtonLike.setColorFilter(Color.rgb(0, 0, 0));
+                                    imageButtonDislike.setColorFilter(Color.rgb(150, 0, 0));
+                                } else if (updown.equals("U")) {
+
+                                    imageButtonDislike.setColorFilter(Color.rgb(0, 0, 0));
+                                    imageButtonLike.setColorFilter(Color.rgb(0, 150, 0));
+                                }
+                            }
+                        }
+                    };
+                    AceQLDBManager.executeUpdate(onGetPreparedStatement, onUpdateCompleted);
+                }
+            }
+        };
+        AceQLDBManager.executeUpdate(ac, abc);
+
+
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -243,6 +367,10 @@ public class PointViewerFragment extends Fragment implements View.OnClickListene
             Intent i = new Intent(getActivity(), CommentListActivity.class);
             i.putExtra(Constants.extras.PID, PID);
             startActivity(i);
+        } else if (id == R.id.image_button_dislike) {
+            performVote("D");
+        } else if (id == R.id.image_button_like) {
+            performVote("U");
         } else {
             l.w("Unhandled view clicked with ID: " + v.getId());
         }
